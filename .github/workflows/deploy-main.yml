@@ -14,6 +14,23 @@ jobs:
         with:
           token: ${{ secrets.CLOUDTYPE_TOKEN }}
           ghtoken: ${{ secrets.GHP_TOKEN }}
+      - name: Create .env file
+        env:
+          LOG_DIR: ${{ secrets.LOG_DIR }}
+          LOG_FILE: ${{ secrets.LOG_FILE }}
+          LOG_FORMAT: ${{ secrets.LOG_FORMAT }}
+          LOG_DATE_FORMAT: ${{ secrets.LOG_DATE_FORMAT }}
+          LOG_LEVEL: ${{ secrets.LOG_LEVEL }}
+          NAVER_AUTODETECT_URL: ${{ secrets.NAVER_AUTODETECT_URL }}
+          NAVER_TRANSLATE_URL: ${{ secrets.NAVER_TRANSLATE_URL }}
+        run: |
+          echo "LOG_DIR=${LOG_DIR}" >> .env
+          echo "LOG_FILE=${LOG_FILE}" >> .env
+          echo "LOG_FORMAT=${LOG_FORMAT}" >> .env
+          echo "LOG_DATE_FORMAT=${LOG_DATE_FORMAT}" >> .env
+          echo "LOG_LEVEL=${LOG_LEVEL}" >> .env
+          echo "NAVER_AUTODETECT_URL=${NAVER_AUTODETECT_URL}" >> .env
+          echo "NAVER_TRANSLATE_URL=${NAVER_TRANSLATE_URL}" >> .env
       - name: Deploy
         uses: cloudtype-github-actions/deploy@v1
         with:
