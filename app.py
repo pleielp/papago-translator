@@ -39,13 +39,13 @@ def translate():
 
         # 파파고 번역 API 호출
         try:
-            translated_text = translate_using_naver(text, source, target)
+            res = translate_using_naver(text, source, target)
         except Exception as e:
             res = jsonify({'result': 'error', 'msg': e.args[1]})
             res.status_code = e.args[0]
             return res
-
-        return jsonify(translated_text)
+        
+        return jsonify(res)
 
 def autodetect_using_naver(text: str) -> str:
     autodetect_url = os.environ.get('NAVER_AUTODETECT_URL')
@@ -98,7 +98,11 @@ def translate_using_naver(text, source, target) -> dict:
     if res.status_code != 200:
         raise Exception(res.status_code, f"{res.json()['errorMessage']}")
 
-    result = res.json()['message']['result']
+    result = res.json()
     app.logger.debug(f"naver translate result: {result}")
 
     return result
+
+if __name__ == '__main__':
+    app.logger.info("Server is ready for requests.")
+    app.run()
