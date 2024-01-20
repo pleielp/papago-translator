@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, make_response
 import requests
 import os
 from dotenv import load_dotenv
@@ -40,12 +40,14 @@ def translate():
         # 파파고 번역 API 호출
         try:
             res = translate_using_naver(text, source, target)
+            res = jsonify(res)
+            res.headers.add('Access-Control-Allow-Origin', '*')
         except Exception as e:
             res = jsonify({'result': 'error', 'msg': e.args[1]})
             res.status_code = e.args[0]
             return res
         
-        return jsonify(res)
+        return res
 
 def autodetect_using_naver(text: str) -> str:
     autodetect_url = os.environ.get('NAVER_AUTODETECT_URL')
