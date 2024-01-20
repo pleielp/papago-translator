@@ -1,0 +1,57 @@
+name: Deploy to cloudtype
+on:
+  push:
+    branches:
+      - main
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Connect deploy key
+        uses: cloudtype-github-actions/connect@v1
+        with:
+          token: ${{ secrets.CLOUDTYPE_TOKEN }}
+          ghtoken: ${{ secrets.GHP_TOKEN }}
+      - name: Create .env file
+        env:
+          LOG_DIR: ${{ secrets.LOG_DIR }}
+          LOG_FILE: ${{ secrets.LOG_FILE }}
+          LOG_FORMAT: ${{ secrets.LOG_FORMAT }}
+          LOG_DATE_FORMAT: ${{ secrets.LOG_DATE_FORMAT }}
+          LOG_LEVEL: ${{ secrets.LOG_LEVEL }}
+          NAVER_AUTODETECT_URL: ${{ secrets.NAVER_AUTODETECT_URL }}
+          NAVER_TRANSLATE_URL: ${{ secrets.NAVER_TRANSLATE_URL }}
+        run: |
+          echo "LOG_DIR=${LOG_DIR}" >> .env
+          echo "LOG_FILE=${LOG_FILE}" >> .env
+          echo "LOG_FORMAT=${LOG_FORMAT}" >> .env
+          echo "LOG_DATE_FORMAT=${LOG_DATE_FORMAT}" >> .env
+          echo "LOG_LEVEL=${LOG_LEVEL}" >> .env
+          echo "NAVER_AUTODETECT_URL=${NAVER_AUTODETECT_URL}" >> .env
+          echo "NAVER_TRANSLATE_URL=${NAVER_TRANSLATE_URL}" >> .env
+      - name: Deploy
+        uses: cloudtype-github-actions/deploy@v1
+        with:
+          token: ${{ secrets.CLOUDTYPE_TOKEN }}
+          project: kimty5472/web-cloudtype
+          stage: main
+          yaml: |
+            name: papago-translator
+            app: python@3.9
+            options:
+              env:
+                - name: FLASK_ENV
+                  value: production
+                - name: NAVER_CLIENT_ID
+                  value: RTobsX5c1LCOXRCU9QFs
+                - name: NAVER_CLIENT_SECRET
+                  value: 7AjSD5hr3D
+              ports: "5000"
+              start: gunicorn -b 0.0.0.0:5000 app:app
+            context:
+              git:
+                url: git@github.com:${{ github.repository }}.git
+                ref: ${{ github.ref }}
+              preset: python-flask
