@@ -1,4 +1,5 @@
 from flask import Flask, request, jsonify, make_response
+from flask_cors import CORS
 import requests
 import os
 from dotenv import load_dotenv
@@ -9,6 +10,7 @@ load_dotenv()
 
 app = Flask(__name__)
 get_logger(__name__)
+CORS(app)
 
 @app.route("/translate", methods=['POST'])
 def translate():
@@ -40,14 +42,12 @@ def translate():
         # 파파고 번역 API 호출
         try:
             res = translate_using_naver(text, source, target)
-            res = jsonify(res)
-            res.headers.add('Access-Control-Allow-Origin', '*')
         except Exception as e:
             res = jsonify({'result': 'error', 'msg': e.args[1]})
             res.status_code = e.args[0]
             return res
         
-        return res
+        return jsonify(res)
 
 def autodetect_using_naver(text: str) -> str:
     autodetect_url = os.environ.get('NAVER_AUTODETECT_URL')
@@ -101,7 +101,6 @@ def translate_using_naver(text, source, target) -> dict:
         raise Exception(res.status_code, f"{res.json()['errorMessage']}")
 
     result = res.json()
-    app.logger.debug(f"naver translate result: {result}")
 
     return result
 
